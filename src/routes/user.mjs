@@ -28,6 +28,20 @@ userRouter.get("/:id", async (c, w) => {
   }
 });
 
+userRouter.get("/profile/:userId", async (c, w) => {
+  const { userId } = c.params;
+  try {
+    const profile = await User.findById(userId).populate("profile");
+    if (!profile || !profile.profile) {
+      return w.status(404).send("Profile not found");
+    }
+    return w.status(200).send(profile);
+  } catch (error) {
+    console.log(error);
+    return w.status(500).send("Internal Server Error");
+  }
+});
+
 userRouter.post("/", async (c, w) => {
   const data = c.body;
   try {
@@ -42,10 +56,10 @@ userRouter.post("/", async (c, w) => {
 userRouter.put("/profile/:userId", async (c, w) => {
   const { image } = c.body;
   try {
-    const user = await User.findById(c.params.userId);
-    const profile = await Profile.create({ user: user._id, image: image });
-    user.profile = profile._id;
-    await user.save();
+    const profile = await Profile.create({ user: c.params.userId, image });
+    const user = await User.findByIdAndUpdate(c.params.userId, {
+      profile: profile._id,
+    });
 
     console.log(profile);
     console.log(user);
