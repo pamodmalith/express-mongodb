@@ -15,6 +15,12 @@ const productSchema = new Schema(
       ref: "User",
       required: true,
     },
+    category: [
+      {
+        type: Types.ObjectId,
+        ref: "Category",
+      },
+    ],
   },
   { timestamps: true }
 );
