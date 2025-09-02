@@ -1,4 +1,5 @@
 import { model, Schema, Types } from "mongoose";
+import User from "./user.mjs";
 
 const profileSchema = new Schema(
   {
@@ -17,6 +18,14 @@ const profileSchema = new Schema(
     timestamps: true,
   }
 );
+
+profileSchema.pre("deleteOne", async function (next) {
+  const profile = await this.model.findOne(this.getQuery());
+  if (profile) {
+    await User.updateOne({ _id: profile.user }, { profile: null });
+  }
+  next();
+});
 
 const Profile = model("Profile", profileSchema);
 
